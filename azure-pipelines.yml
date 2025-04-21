@@ -1,26 +1,64 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.8'
-    addToPath: true
+  # ---------------------------
+  - stage: Dev
+    displayName: Dev Environment - Build and Test
+    jobs:
+      - job: BuildTest
+        displayName: Build & Run Model Tests
+        pool:
+          vmImage: 'ubuntu-latest'
 
-- script: |
-    echo "Building the Python application"
-    python -m compileall .
-  displayName: 'Build Python App'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.10'
 
-- task: CopyFiles@2
-  inputs:
-    contents: '**/*.py'
-    targetFolder: '$(build.artifactStagingDirectory)'
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: 'Install Dependencies'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'drop'
+          - script: |
+              echo "Listing files..."
+              ls -al
+            displayName: 'Check files in repo'
+
+          - script: |
+              echo "🚦 Running model test from app.py..."
+              python app.py
+            displayName: 'Run app.py Model Test'
+            continueOnError: false  # Fails if test fails
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: 'model_output'
+              artifactName: 'model_artifacts'
+              publishLocation: 'Container'
+            displayName: 'Publish Model Artifacts'
+
+  # ---------------------------
+  - stage: Prod
+    displayName: Prod Environment - Release
+    dependsOn: Dev
+    condition: succeeded()
+
+    jobs:
+      - job: Release
+        displayName: Release to Production
+        pool:
+          vmImage: 'ubuntu-latest'
+
+        steps:
+          - download: current
+            artifact: model_artifacts
+
+          - script: |
+              echo "Models and artifacts are ready for production."
+              echo "(This stage can be extended to deploy to a real target.)"
+            displayName: 'Mock Production Deployment'

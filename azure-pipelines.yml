@@ -30,7 +30,7 @@ stages:
             displayName: 'Check files in repo'
 
           - script: |
-              echo "🚦 Running model test from app.py..."
+              echo "Running model test from app.py..."
               python app.py
             displayName: 'Run app.py Model Test'
             continueOnError: false  # Fails if test fails

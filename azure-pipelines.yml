@@ -60,5 +60,28 @@ stages:
 
           - script: |
               echo "Models and artifacts are ready for production."
-              echo "(This stage can be extended to deploy to a real target.)"
-            displayName: 'Mock Production Deployment'
+              echo "Hitting live Render API to verify deployment..."
+
+              # Live Render endpoint (replace if renamed)
+              ENDPOINT="https://fraud-detection-model-ylql.onrender.com/test-case?index=40"
+
+              echo "Calling $ENDPOINT..."
+              RESPONSE=$(curl -s $ENDPOINT)
+
+              echo "Response from API:"
+              echo "$RESPONSE"
+
+              # Count number of predictions equal to 1
+              CORRECT=$(echo "$RESPONSE" | grep -o '"prediction": 1' | wc -l)
+              echo "Correct predictions: $CORRECT"
+
+              # Set how many models must predict fraud for a pass
+              REQUIRED=6
+
+              if [ "$CORRECT" -lt "$REQUIRED" ]; then
+                echo "Not all models predicted fraud. Deployment failed."
+                exit 1
+              else
+                echo "All models predicted fraud correctly. Releasing to production!"
+              fi
+            displayName: 'Validate FastAPI Deployment'

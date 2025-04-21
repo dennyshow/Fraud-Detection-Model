@@ -3,9 +3,12 @@ numpy==1.26.4
 scikit-learn==1.0.2
 joblib==1.4.2
 
+# Python libraries for compatibility
 pandas
 notebook
 ipykernel
 matplotlib
 jupyter
 dill
+fastapi
+uvicorn

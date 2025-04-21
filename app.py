@@ -18,7 +18,7 @@ fraud_indices = y_test[y_test["Class"] == 1].index.tolist()
 
 # Manually selecting two fraud samples to test my models —
 # one that I expect to pass and one that should fail (based on prior results)
-selected_indices = [40, 56]  # These can be changed to test other cases
+selected_indices = [40, 180]  # These can be changed to test other cases
 
 # Defining the models I’ve trained and saved previously
 models_to_test = [

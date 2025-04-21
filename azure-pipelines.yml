@@ -72,7 +72,7 @@ stages:
               echo "$RESPONSE"
 
               # Count number of predictions equal to 1
-              CORRECT=$(echo "$RESPONSE" | grep -o '"prediction": 1' | wc -l)
+              CORRECT=$(echo $response | jq '.results | map(select(.prediction == 1)) | length')
               echo "Correct predictions: $CORRECT"
 
               # Set how many models must predict fraud for a pass
